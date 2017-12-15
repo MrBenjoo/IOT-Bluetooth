@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.util.Log;
+
 import java.util.Set;
 
 
@@ -18,7 +19,6 @@ public class Controller {
         if (bluetoothAdapter != null) {
             enableBlueTooth();
             searchForBlueToothDevices();
-
         }
     }
 
@@ -45,7 +45,7 @@ public class Controller {
                 Log.d("Controller", "device name: " + device.getName());
                 Log.d("Controller", "device address: " + device.getAddress());
 
-                ConnectThread connectThread = new ConnectThread(device);
+                ConnectThread connectThread = new ConnectThread(device, bluetoothAdapter);
                 connectThread.start();
             }
         }
