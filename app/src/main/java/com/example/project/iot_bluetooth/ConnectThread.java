@@ -34,7 +34,7 @@ public class ConnectThread extends Thread {
         bluetoothAdapter.cancelDiscovery();
         try {
             mmSocket.connect();
-            if(mmSocket.isConnected()) {
+            if (mmSocket.isConnected()) {
                 Log.d("ConnectThread", "Connected to: " + mmDevice.getName() + " " + mmDevice.getAddress());
             }
         } catch (IOException connectException) {
@@ -43,8 +43,9 @@ public class ConnectThread extends Thread {
             } catch (IOException closeException) {
                 closeException.printStackTrace();
             }
-            return;
         }
+        ConnectedThread mConnectedThread = new ConnectedThread(mmSocket, new MyHandler());
+        mConnectedThread.start();
     }
 
     public void cancel() {
