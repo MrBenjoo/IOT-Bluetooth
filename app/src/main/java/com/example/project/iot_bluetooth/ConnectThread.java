@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Message;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -34,7 +33,6 @@ public class ConnectThread extends Thread {
     public void run() {
         btAdapter.cancelDiscovery();
         try {
-            Log.d("connectThread", "skapar en bluetooth socket");
             btSocket.connect();
             sendDeviceNameToUI();
         } catch (IOException connectException) {
@@ -52,7 +50,6 @@ public class ConnectThread extends Thread {
         Message message = new Message();
         message.what = SET_DEVICE_NAME;
         message.obj = btDevice.getName();
-        Log.d("connectThread", "skickar device name = " + btDevice.getName());
         handler.sendMessage(message);
     }
 

@@ -1,7 +1,6 @@
 package com.example.project.iot_bluetooth;
 
 import android.bluetooth.BluetoothSocket;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,11 +30,8 @@ public class ConnectedThread extends Thread {
         int bytes = 0;
         while (true) {
             try {
-
-                // KOPIERAT KOD FRÅN EXEMPLET
                 bytes += input.read(buffer, bytes, buffer.length - bytes);
                 for (int i = begin; i < bytes; i++) {
-
                     if (buffer[i] == '\n') {
                         handler.obtainMessage(1, begin, i, buffer).sendToTarget();
                         begin = i + 1;
@@ -45,13 +41,11 @@ public class ConnectedThread extends Thread {
                         }
                     }
                 }
-
             } catch (IOException e) {
                 break;
             }
         }
     }
-
 
     public void cancel() throws IOException {
         btSocket.close();

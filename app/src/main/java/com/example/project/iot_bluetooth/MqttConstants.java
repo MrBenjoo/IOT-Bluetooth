@@ -1,10 +1,6 @@
 package com.example.project.iot_bluetooth;
 
-/**
- * Created by Benji on 2017-12-01.
- */
-
-public class Constants {
+public class MqttConstants {
 
     // tcp://user:pass@host:port
     public static final String MQTT_BROKER_URL = "tcp://iuzfrvrt:bwga1O6mKfiO@m14.cloudmqtt.com:10099";

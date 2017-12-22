@@ -21,7 +21,6 @@ public class PahoMqttClient {
     private MqttAndroidClient mqttAndroidClient;
 
     public MqttAndroidClient getMqttClient(Context context, String brokerUrl, String clientId) {
-
         mqttAndroidClient = new MqttAndroidClient(context, brokerUrl, clientId);
         try {
             IMqttToken token = mqttAndroidClient.connect(getMqttConnectionOption());
@@ -75,7 +74,7 @@ public class PahoMqttClient {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setCleanSession(false);
         mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setWill(Constants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
+        mqttConnectOptions.setWill(MqttConstants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
         mqttConnectOptions.setUserName("iuzfrvrt");
         mqttConnectOptions.setPassword("bwga1O6mKfiO".toCharArray());
         return mqttConnectOptions;
@@ -99,12 +98,12 @@ public class PahoMqttClient {
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
-                Log.v(TAG, "Subscribe Successfully " + topic);
+                Log.d(TAG, "Subscribe Successfully " + topic);
             }
 
             @Override
             public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                Log.e(TAG, "Subscribe Failed " + topic);
+                Log.d(TAG, "Subscribe Failed " + topic);
 
             }
         });

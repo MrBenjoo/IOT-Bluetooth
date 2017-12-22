@@ -28,4 +28,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     compile files('libs/org.eclipse.paho.android.service-1.1.1.jar')
     compile files('libs/org.eclipse.paho.client.mqttv3-1.1.1.jar')
+    compile 'com.android.support:cardview-v7:26.1.0'
 }

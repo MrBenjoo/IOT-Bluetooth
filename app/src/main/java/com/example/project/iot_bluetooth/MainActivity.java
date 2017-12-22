@@ -5,12 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import java.io.IOException;
-
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvStatus;
     private TextView tvMqttStatus;
+    private TextView tvGesture;
     static Controller controller;
 
     @Override
@@ -24,10 +23,12 @@ public class MainActivity extends AppCompatActivity {
     private void initComponents() {
         tvStatus = findViewById(R.id.activity_tv_status);
         tvMqttStatus  = findViewById(R.id.activity_tv_mqtt_status);
+        tvGesture  = findViewById(R.id.activity_tv_gesture);
     }
 
     public void showConnectedDevice(String name) {
-        tvStatus.setText("Connected to " + name);
+        String connection = "Connected to " + name;
+        tvStatus.setText(connection);
     }
 
     public void showText(String text) {
@@ -40,13 +41,11 @@ public class MainActivity extends AppCompatActivity {
         controller.onPause();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        controller.onResume();
-    }
-
     public void setText(String online) {
         tvMqttStatus.setText(online);
+    }
+
+    public void setGesture(String gesture) {
+        tvGesture.setText(gesture);
     }
 }

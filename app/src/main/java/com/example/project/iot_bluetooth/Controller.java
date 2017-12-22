@@ -1,13 +1,13 @@
 package com.example.project.iot_bluetooth;
 
 
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.IOException;
 import java.util.Set;
@@ -27,14 +27,16 @@ public class Controller {
             enableBlueTooth();
             searchAndConnectBTDevice();
         }
-        initMqttCloud();
+        initMQTTService();
     }
 
-    private void initMqttCloud() {
+    private void initMQTTService() {
         pahoMqttClient = new PahoMqttClient();
-        client = pahoMqttClient.getMqttClient(mainActivity.getApplicationContext(), Constants.MQTT_BROKER_URL, Constants.CLIENT_ID);
+        client = pahoMqttClient.getMqttClient(mainActivity.getApplicationContext(), MqttConstants.MQTT_BROKER_URL, MqttConstants.CLIENT_ID);
         Intent intent = new Intent(mainActivity, MqttMessageService.class);
         mainActivity.startService(intent);
+        TestThread tt = new TestThread(this);
+        tt.start();
     }
 
     private void initBlueTooth() {
@@ -66,19 +68,29 @@ public class Controller {
     }
 
     public void onPause() {
-        //Don't leave Bluetooth sockets open when leaving activity
         try {
             connectThread.cancel();
-        } catch (IOException exception) {
-            exception.printStackTrace();
+        } catch (IOException ioexception) {
+            ioexception.printStackTrace();
         }
     }
 
-    public void onResume() {
-       // TODO
+
+    public void addText(final String text) {
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.setText(text);
+            }
+        });
     }
 
-    public void addText(String text) {
-        mainActivity.setText(text);
+    public void addTextTest() throws MqttException {
+        pahoMqttClient.subscribe(client, "test", 1);
+        addText("test subscribe");
+    }
+
+    public void setGesture(String gesture) {
+        mainActivity.setGesture(gesture);
     }
 }
