@@ -21,6 +21,7 @@ public class MyHandler extends Handler {
 
             case ConnectThread.SET_DEVICE_NAME:
                 String bluetoothDevice = (String) msg.obj;
+                Log.d("MyHandler", bluetoothDevice);
                 controller.setDeviceName(bluetoothDevice);
                 break;
 

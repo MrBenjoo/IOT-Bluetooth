@@ -1,10 +1,13 @@
 package com.example.project.iot_bluetooth;
 
 
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.util.Log;
+
+
+import org.eclipse.paho.android.service.MqttAndroidClient;
 
 import java.io.IOException;
 import java.util.Set;
@@ -14,6 +17,8 @@ public class Controller {
     private MainActivity mainActivity;
     private BluetoothAdapter bluetoothAdapter;
     private ConnectThread connectThread;
+    private MqttAndroidClient client;
+    private PahoMqttClient pahoMqttClient;
 
     public Controller(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -22,6 +27,14 @@ public class Controller {
             enableBlueTooth();
             searchAndConnectBTDevice();
         }
+        initMqttCloud();
+    }
+
+    private void initMqttCloud() {
+        pahoMqttClient = new PahoMqttClient();
+        client = pahoMqttClient.getMqttClient(mainActivity.getApplicationContext(), Constants.MQTT_BROKER_URL, Constants.CLIENT_ID);
+        Intent intent = new Intent(mainActivity, MqttMessageService.class);
+        mainActivity.startService(intent);
     }
 
     private void initBlueTooth() {
@@ -59,6 +72,13 @@ public class Controller {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+    }
 
+    public void onResume() {
+       // TODO
+    }
+
+    public void addText(String text) {
+        mainActivity.setText(text);
     }
 }

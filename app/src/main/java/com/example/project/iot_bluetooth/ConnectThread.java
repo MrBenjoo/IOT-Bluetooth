@@ -34,6 +34,7 @@ public class ConnectThread extends Thread {
     public void run() {
         btAdapter.cancelDiscovery();
         try {
+            Log.d("connectThread", "skapar en bluetooth socket");
             btSocket.connect();
             sendDeviceNameToUI();
         } catch (IOException connectException) {
@@ -51,6 +52,7 @@ public class ConnectThread extends Thread {
         Message message = new Message();
         message.what = SET_DEVICE_NAME;
         message.obj = btDevice.getName();
+        Log.d("connectThread", "skickar device name = " + btDevice.getName());
         handler.sendMessage(message);
     }
 

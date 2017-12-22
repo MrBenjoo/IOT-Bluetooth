@@ -10,7 +10,8 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvStatus;
-    private Controller controller;
+    private TextView tvMqttStatus;
+    static Controller controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initComponents() {
         tvStatus = findViewById(R.id.activity_tv_status);
+        tvMqttStatus  = findViewById(R.id.activity_tv_mqtt_status);
     }
 
     public void showConnectedDevice(String name) {
@@ -36,5 +38,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         controller.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        controller.onResume();
+    }
+
+    public void setText(String online) {
+        tvMqttStatus.setText(online);
     }
 }
