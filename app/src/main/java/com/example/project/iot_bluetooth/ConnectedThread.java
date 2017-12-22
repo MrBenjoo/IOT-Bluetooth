@@ -1,34 +1,27 @@
 package com.example.project.iot_bluetooth;
 
-
 import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
-/**
- * Created by Benji on 2017-12-08.
- */
 
 public class ConnectedThread extends Thread {
-    private final BluetoothSocket mmSocket;
-    private final InputStream mmInStream;
-    private final OutputStream mmOutStream;
-    private MyHandler mHandler;
+    private final BluetoothSocket btSocket;
+    private final InputStream input;
+    private MyHandler handler;
+    public static final int WRISTBAND_DATA = 1;
 
-    public ConnectedThread(BluetoothSocket socket, MyHandler mHandler) {
-        mmSocket = socket;
-        this.mHandler = mHandler;
+    public ConnectedThread(BluetoothSocket btSocket, MyHandler handler) {
+        this.btSocket = btSocket;
+        this.handler = handler;
         InputStream tmpIn = null;
-        OutputStream tmpOut = null;
         try {
-            tmpIn = socket.getInputStream();
-            tmpOut = socket.getOutputStream();
-        } catch (IOException e) {
+            tmpIn = btSocket.getInputStream();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
         }
-        mmInStream = tmpIn;
-        mmOutStream = tmpOut;
+        input = tmpIn;
     }
 
     public void run() {
@@ -37,34 +30,40 @@ public class ConnectedThread extends Thread {
         int bytes = 0;
         while (true) {
             try {
-                bytes += mmInStream.read(buffer, bytes, buffer.length - bytes);
+                bytes += input.read(buffer, bytes, buffer.length - bytes);
                 for (int i = begin; i < bytes; i++) {
-                    if (buffer[i] == "#".getBytes()[0]) {
-                        mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
-                        begin = i + 1;
+                    if (i == 20) {
+                        handler.obtainMessage(WRISTBAND_DATA, begin, i, buffer).sendToTarget();
+                        begin = i;
                         if (i == bytes - 1) {
                             bytes = 0;
                             begin = 0;
                         }
                     }
                 }
+
+                // KOPIERAT KOD FRÅN EXEMPLET
+                /*bytes += input.read(buffer, bytes, buffer.length - bytes);
+                for (int i = begin; i < bytes; i++) {
+
+                    if (buffer[i] == "#".getBytes()[0]) {
+                        handler.obtainMessage(1, begin, i, buffer).sendToTarget();
+                        begin = i + 1;
+                        if (i == bytes - 1) {
+                            bytes = 0;
+                            begin = 0;
+                        }
+                    }
+                }*/
+
             } catch (IOException e) {
                 break;
             }
         }
     }
 
-    public void write(byte[] bytes) {
-        try {
-            mmOutStream.write(bytes);
-        } catch (IOException e) {
-        }
-    }
 
-    public void cancel() {
-        try {
-            mmSocket.close();
-        } catch (IOException e) {
-        }
+    public void cancel() throws IOException {
+        btSocket.close();
     }
 }

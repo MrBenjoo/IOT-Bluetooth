@@ -18,16 +18,14 @@ public class Controller {
         initBlueTooth();
         if (bluetoothAdapter != null) {
             enableBlueTooth();
-            searchForBlueToothDevices();
+            searchAndConnectBTDevice();
         }
     }
 
     private void initBlueTooth() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            Log.d("Controller", "Bluetooth is not supported");
-        } else {
-            Log.d("Controller", "Bluetooth is supported");
+            mainActivity.showText("Bluetooth is not supported.");
         }
     }
 
@@ -38,18 +36,17 @@ public class Controller {
         }
     }
 
-    private void searchForBlueToothDevices() {
+    private void searchAndConnectBTDevice() {
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                Log.d("Controller", "device name: " + device.getName());
-                Log.d("Controller", "device address: " + device.getAddress());
-
-                ConnectThread connectThread = new ConnectThread(device, bluetoothAdapter);
+                ConnectThread connectThread = new ConnectThread(device, bluetoothAdapter, new MyHandler(this));
                 connectThread.start();
             }
         }
     }
 
-
+    public void setDeviceName(String deviceName) {
+        mainActivity.showConnectedDevice(deviceName);
+    }
 }

@@ -3,21 +3,34 @@ package com.example.project.iot_bluetooth;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
-
-
+/**
+ * Används för att trådarna ConnectThread och ConnectedThread ska kunna kommunicera med MainThread (UI thread).
+ */
 public class MyHandler extends Handler {
+    private Controller controller;
+
+    public MyHandler(Controller controller) {
+        this.controller = controller;
+    }
 
     @Override
     public void handleMessage(Message msg) {
-        byte[] writeBuf = (byte[]) msg.obj;
-        int begin = (int)msg.arg1;
-        int end = (int)msg.arg2;
+        switch (msg.what) {
 
-        switch(msg.what) {
-            case 1:
-                String writeMessage = new String(writeBuf);
-                writeMessage = writeMessage.substring(begin, end);
+            case ConnectThread.SET_DEVICE_NAME:
+                String bluetoothDevice = (String) msg.obj;
+                controller.setDeviceName(bluetoothDevice);
+                break;
+
+            case ConnectedThread.WRISTBAND_DATA:
+                byte[] writeBuf = (byte[]) msg.obj;
+                int begin = (int) msg.arg1;
+                int end = (int) msg.arg2;
+                String receivedData = new String(writeBuf);
+                receivedData = receivedData.substring(begin, end);
+                Log.d("MyHandler", "message = " + receivedData);
                 break;
         }
     }
