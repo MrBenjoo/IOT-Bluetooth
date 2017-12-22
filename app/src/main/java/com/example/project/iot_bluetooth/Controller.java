@@ -6,12 +6,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.Set;
 
 
 public class Controller {
     private MainActivity mainActivity;
     private BluetoothAdapter bluetoothAdapter;
+    private ConnectThread connectThread;
 
     public Controller(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -40,7 +42,7 @@ public class Controller {
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                ConnectThread connectThread = new ConnectThread(device, bluetoothAdapter, new MyHandler(this));
+                connectThread = new ConnectThread(device, bluetoothAdapter, new MyHandler(this));
                 connectThread.start();
             }
         }
@@ -48,5 +50,15 @@ public class Controller {
 
     public void setDeviceName(String deviceName) {
         mainActivity.showConnectedDevice(deviceName);
+    }
+
+    public void onPause() {
+        //Don't leave Bluetooth sockets open when leaving activity
+        try {
+            connectThread.cancel();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
     }
 }

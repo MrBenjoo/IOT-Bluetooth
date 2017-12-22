@@ -28,9 +28,15 @@ public class MyHandler extends Handler {
                 byte[] writeBuf = (byte[]) msg.obj;
                 int begin = (int) msg.arg1;
                 int end = (int) msg.arg2;
+
                 String receivedData = new String(writeBuf);
                 receivedData = receivedData.substring(begin, end);
                 Log.d("MyHandler", "message = " + receivedData);
+
+
+                /* NAMRAS KOD
+                String inputString = (String) msg.obj;
+                Log.d("MyHandler", "message = " + inputString);*/
                 break;
         }
     }

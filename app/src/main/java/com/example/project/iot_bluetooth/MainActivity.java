@@ -5,16 +5,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import java.io.IOException;
+
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvStatus;
+    private Controller controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
-        new Controller(this);
+        controller = new Controller(this);
     }
 
     private void initComponents() {
@@ -29,4 +32,9 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG).show();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        controller.onPause();
+    }
 }
