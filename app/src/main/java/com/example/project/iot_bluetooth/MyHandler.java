@@ -6,7 +6,7 @@ import android.os.Message;
 import android.util.Log;
 
 /**
- * Används för att trådarna ConnectThread och ConnectedThread ska kunna kommunicera med MainThread (UI thread).
+ * Used for 'ConnectThread' and 'ConnectedThread' threads to be able communicate with the main thread (UI thread).
  */
 public class MyHandler extends Handler {
     private Controller controller;
@@ -20,9 +20,9 @@ public class MyHandler extends Handler {
         switch (msg.what) {
 
             case ConnectThread.SET_DEVICE_NAME:
-                String bluetoothDevice = (String) msg.obj;
-                Log.d("MyHandler", bluetoothDevice);
-                controller.setDeviceName(bluetoothDevice);
+                String deviceName = (String) msg.obj;
+                String connection = "connected to " + deviceName;
+                controller.setBluetoothStatus(connection);
                 break;
 
             case ConnectedThread.WRISTBAND_DATA:

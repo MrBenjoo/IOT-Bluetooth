@@ -1,15 +1,16 @@
 package com.example.project.iot_bluetooth;
 
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import static com.example.project.iot_bluetooth.Controller.REQUEST_ENABLE_BT;
+
 
 public class MainActivity extends AppCompatActivity {
-    private TextView tvStatus;
-    private TextView tvMqttStatus;
-    private TextView tvGesture;
+    private TextView tvStatus, tvMqttStatus, tvGesture;
     static Controller controller;
 
     @Override
@@ -22,13 +23,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void initComponents() {
         tvStatus = findViewById(R.id.activity_tv_status);
-        tvMqttStatus  = findViewById(R.id.activity_tv_mqtt_status);
-        tvGesture  = findViewById(R.id.activity_tv_gesture);
+        tvMqttStatus = findViewById(R.id.activity_tv_mqtt_status);
+        tvGesture = findViewById(R.id.activity_tv_gesture);
     }
 
-    public void showConnectedDevice(String name) {
-        String connection = "Connected to " + name;
-        tvStatus.setText(connection);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) { // The user chose to enable Bluetooth in the dialog
+                setTextBluetooth("Connect to a device.");
+            } else {
+                setTextBluetooth("Bluetooth disabled.");
+            }
+        }
+    }
+
+    public void setTextBluetooth(String btStatus) {
+        tvStatus.setText(btStatus);
+    }
+
+    public void setText(String mqttStatus) {
+        tvMqttStatus.setText(mqttStatus);
+    }
+
+    public void setGesture(String gesture) {
+        tvGesture.setText(gesture);
     }
 
     public void showText(String text) {
@@ -41,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
         controller.onPause();
     }
 
-    public void setText(String online) {
-        tvMqttStatus.setText(online);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        controller.onDestroy();
     }
 
-    public void setGesture(String gesture) {
-        tvGesture.setText(gesture);
-    }
+
 }

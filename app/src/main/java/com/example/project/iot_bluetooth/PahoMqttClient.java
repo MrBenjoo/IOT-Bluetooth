@@ -34,6 +34,7 @@ public class PahoMqttClient {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    MainActivity.controller.addText("Failed to connect to MQTT");
                     Log.d(TAG, "Failure " + exception.toString());
                 }
             });
