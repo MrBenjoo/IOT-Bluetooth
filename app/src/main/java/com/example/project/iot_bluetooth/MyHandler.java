@@ -33,6 +33,10 @@ public class MyHandler extends Handler {
                 receivedData = receivedData.substring(begin, end);
                 Log.d("MyHandler", "message = " + receivedData);
                 break;
+
+                case ConnectThread.CONNECTION_FAILED:
+                    controller.setBluetoothStatus("No connection to " + msg.obj);
+                    break;
         }
     }
 

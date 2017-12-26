@@ -29,9 +29,10 @@ public class PahoMqttClient {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     mqttAndroidClient.setBufferOpts(getDisconnectedBufferOptions());
                 }
+
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    MainActivity.controller.addText("Failed to connect to server");
+                    MainActivity.controller.addText("Failed to connect");
                     Log.d(TAG, "Failure " + exception.toString());
                 }
             });
@@ -71,14 +72,13 @@ public class PahoMqttClient {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setCleanSession(false);
         mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setWill(MqttConstants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
+        mqttConnectOptions.setWill(Constants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
         mqttConnectOptions.setUserName("iuzfrvrt");
         mqttConnectOptions.setPassword("bwga1O6mKfiO".toCharArray());
         return mqttConnectOptions;
     }
 
-    public void publishMessage(@NonNull MqttAndroidClient client, @NonNull String msg, int qos, @NonNull String topic)
-            throws MqttException, UnsupportedEncodingException {
+    public void publishMessage(@NonNull MqttAndroidClient client, @NonNull String msg, int qos, @NonNull String topic) throws MqttException, UnsupportedEncodingException {
         byte[] encodedPayload = new byte[0];
         encodedPayload = msg.getBytes("UTF-8");
         MqttMessage message = new MqttMessage(encodedPayload);

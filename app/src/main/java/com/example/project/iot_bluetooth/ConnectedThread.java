@@ -11,7 +11,6 @@ public class ConnectedThread extends Thread {
     private InputStream input;
     private MyHandler handler;
     private boolean reading = true;
-    public static final int WRISTBAND_DATA = 1;
 
     public ConnectedThread(BluetoothSocket btSocket, MyHandler handler) {
         this.btSocket = btSocket;
@@ -34,7 +33,7 @@ public class ConnectedThread extends Thread {
                 bytes += input.read(buffer, bytes, buffer.length - bytes);
                 for (int i = begin; i < bytes; i++) {
                     if (buffer[i] == '\n') {
-                        handler.obtainMessage(WRISTBAND_DATA, begin, i, buffer).sendToTarget();
+                        handler.obtainMessage(Constants.WRISTBAND_DATA, begin, i, buffer).sendToTarget();
                         begin = i + 1;
                         if (i == bytes - 1) {
                             bytes = 0;
@@ -50,6 +49,7 @@ public class ConnectedThread extends Thread {
 
     public void cancel() throws IOException {
         reading = false;
+        input.close();
         btSocket.close();
     }
 }

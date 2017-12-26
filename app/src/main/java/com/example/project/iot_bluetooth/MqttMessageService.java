@@ -19,7 +19,7 @@ public class MqttMessageService extends Service {
     public void onCreate() {
         super.onCreate();
         PahoMqttClient pahoMqttClient = new PahoMqttClient();
-        MqttAndroidClient mqttAndroidClient = pahoMqttClient.getMqttClient(getApplicationContext(), MqttConstants.MQTT_BROKER_URL, MqttConstants.CLIENT_ID);
+        MqttAndroidClient mqttAndroidClient = pahoMqttClient.getMqttClient(getApplicationContext(), Constants.MQTT_BROKER_URL, Constants.CLIENT_ID);
 
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -34,7 +34,7 @@ public class MqttMessageService extends Service {
 
             @Override
             public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                Log.d("messageArrived", "s = " + s + " mqttMessage = " + mqttMessage.toString());
+                Log.d("messageArrived", "topic = " + s + " mqttMessage = " + mqttMessage.toString());
                 MainActivity.controller.setGesture(mqttMessage.toString());
                 //setMessageNotification(s, new String(mqttMessage.getPayload()));
             }
@@ -56,12 +56,6 @@ public class MqttMessageService extends Service {
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
     }
 
 }

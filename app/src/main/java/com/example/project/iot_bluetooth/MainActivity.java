@@ -4,13 +4,16 @@ import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import static com.example.project.iot_bluetooth.Controller.REQUEST_ENABLE_BT;
 
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView tvStatus, tvMqttStatus, tvGesture;
+    private Button btnUnsub, btnSub, btnPub; // Används endast för test
     static Controller controller;
 
     @Override
@@ -25,6 +28,15 @@ public class MainActivity extends AppCompatActivity  {
         tvStatus = findViewById(R.id.activity_tv_status);
         tvMqttStatus = findViewById(R.id.activity_tv_mqtt_status);
         tvGesture = findViewById(R.id.activity_tv_gesture);
+
+        /* ANVÄNDS ENDAST FÖR TEST */
+        btnUnsub = findViewById(R.id.btn_unsubscribe);
+        btnSub = findViewById(R.id.btn_subscribe);
+        btnPub = findViewById(R.id.btn_publish);
+        btnUnsub.setOnClickListener(this);
+        btnSub.setOnClickListener(this);
+        btnPub.setOnClickListener(this);
+
     }
 
     @Override
@@ -51,10 +63,6 @@ public class MainActivity extends AppCompatActivity  {
         tvGesture.setText(gesture);
     }
 
-    public void showText(String text) {
-        Snackbar.make(findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG).show();
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -65,5 +73,20 @@ public class MainActivity extends AppCompatActivity  {
     protected void onDestroy() {
         super.onDestroy();
         controller.onDestroy();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_subscribe:
+                controller.testSubscribe_topicTest();
+                break;
+            case R.id.btn_unsubscribe:
+                controller.testUnsubscribeFrom_topicTest();
+                break;
+            case R.id.btn_publish:
+                controller.testPublishMessage_ThisIsATest();
+                break;
+        }
     }
 }
