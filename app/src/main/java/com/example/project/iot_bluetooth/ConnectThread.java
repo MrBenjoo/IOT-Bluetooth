@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Message;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -12,8 +11,9 @@ import java.util.UUID;
 public class ConnectThread extends Thread {
     private final BluetoothDevice btDevice;
     private final BluetoothAdapter btAdapter;
-    private final BluetoothSocket btSocket;
+    private BluetoothSocket btSocket;
     private MyHandler handler;
+    private ConnectedThread mConnectedThread;
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     public static final int SET_DEVICE_NAME = 0;
@@ -38,14 +38,19 @@ public class ConnectThread extends Thread {
             sendDeviceNameToUI();
         } catch (IOException connectException) {
             try {
-                Log.d("exception", "exception on connection with btsocket");
-                btSocket.close();
-                connectException.printStackTrace();
-            } catch (IOException closeException) {
-                closeException.printStackTrace();
+                btSocket = (BluetoothSocket) btDevice.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(btDevice, 1);
+                btSocket.connect();
+                sendDeviceNameToUI();
+            } catch (Exception exception) {
+                try {
+                    btSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                exception.printStackTrace();
             }
         }
-        ConnectedThread mConnectedThread = new ConnectedThread(btSocket, handler);
+        mConnectedThread = new ConnectedThread(btSocket, handler);
         mConnectedThread.start();
     }
 
@@ -58,6 +63,9 @@ public class ConnectThread extends Thread {
 
     public void cancel() throws IOException {
         btSocket.close();
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+        }
     }
 
 }

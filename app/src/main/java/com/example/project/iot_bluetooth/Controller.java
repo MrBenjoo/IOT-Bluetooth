@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -47,6 +48,8 @@ public class Controller {
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             mainActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            setBluetoothStatus("No device connected...");
         }
     }
 
@@ -55,6 +58,7 @@ public class Controller {
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
                 connectToDevice(device);
+
             }
         }
     }
@@ -79,8 +83,6 @@ public class Controller {
         client = pahoMqttClient.getMqttClient(mainActivity.getApplicationContext(), MqttConstants.MQTT_BROKER_URL, MqttConstants.CLIENT_ID);
         Intent intent = new Intent(mainActivity, MqttMessageService.class);
         mainActivity.startService(intent);
-        TestThread tt = new TestThread(this);
-        tt.start();
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -102,18 +104,17 @@ public class Controller {
                         break;
                 }
             }
-
         }
     };
 
     private void bluetoothStateChanged(int state) {
         switch (state) {
             case BluetoothAdapter.STATE_ON:
-                setBluetoothStatus("Connect to a device.");
+                setBluetoothStatus("No device connected...");
                 searchAndConnectBTDevice();
                 break;
             case BluetoothAdapter.STATE_OFF:
-                setBluetoothStatus("Bluetooth disabled.");
+                setBluetoothStatus("Bluetooth disabled");
                 break;
         }
     }
@@ -131,7 +132,7 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setBluetoothStatus("Connect to a device.");
+        setBluetoothStatus("No device connected...");
     }
 
 
@@ -152,11 +153,6 @@ public class Controller {
         });
     }
 
-    public void addTextTest() throws MqttException {
-        pahoMqttClient.subscribe(client, "test", 1);
-        addText("test subscribe");
-    }
-
     /* Shutdown the connection */
     public void onPause() {
         try {
@@ -171,6 +167,5 @@ public class Controller {
     public void onDestroy() {
         mainActivity.unregisterReceiver(broadcastReceiver);
     }
-
 
 }

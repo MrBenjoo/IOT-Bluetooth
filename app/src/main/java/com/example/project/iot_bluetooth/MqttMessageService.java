@@ -24,12 +24,12 @@ public class MqttMessageService extends Service {
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean b, String s) {
-                Log.d(TAG, "connectComplete");
+                MainActivity.controller.addText("Connected to MQTT");
             }
 
             @Override
             public void connectionLost(Throwable throwable) {
-                Log.d(TAG, "connectionLost");
+                MainActivity.controller.addText("Connection lost");
             }
 
             @Override

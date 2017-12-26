@@ -30,8 +30,7 @@
         <service
             android:name=".MqttMessageService"
             android:enabled="true"
-            android:exported="false">
-        </service>
+            android:exported="false" />
 
     </application>
 

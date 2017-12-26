@@ -28,20 +28,16 @@ public class PahoMqttClient {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     mqttAndroidClient.setBufferOpts(getDisconnectedBufferOptions());
-                    MainActivity.controller.addText("Connected to MQTT");
-                    Log.d(TAG, "Success");
                 }
-
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    MainActivity.controller.addText("Failed to connect to MQTT");
+                    MainActivity.controller.addText("Failed to connect to server");
                     Log.d(TAG, "Failure " + exception.toString());
                 }
             });
         } catch (MqttException e) {
             e.printStackTrace();
         }
-
         return mqttAndroidClient;
     }
 
@@ -81,7 +77,6 @@ public class PahoMqttClient {
         return mqttConnectOptions;
     }
 
-
     public void publishMessage(@NonNull MqttAndroidClient client, @NonNull String msg, int qos, @NonNull String topic)
             throws MqttException, UnsupportedEncodingException {
         byte[] encodedPayload = new byte[0];
@@ -111,9 +106,7 @@ public class PahoMqttClient {
     }
 
     public void unSubscribe(@NonNull MqttAndroidClient client, @NonNull final String topic) throws MqttException {
-
         IMqttToken token = client.unsubscribe(topic);
-
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {

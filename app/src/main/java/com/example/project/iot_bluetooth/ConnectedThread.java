@@ -7,9 +7,10 @@ import java.io.InputStream;
 
 
 public class ConnectedThread extends Thread {
-    private final BluetoothSocket btSocket;
-    private final InputStream input;
+    private BluetoothSocket btSocket;
+    private InputStream input;
     private MyHandler handler;
+    private boolean reading = true;
     public static final int WRISTBAND_DATA = 1;
 
     public ConnectedThread(BluetoothSocket btSocket, MyHandler handler) {
@@ -28,12 +29,12 @@ public class ConnectedThread extends Thread {
         byte[] buffer = new byte[1024];
         int begin = 0;
         int bytes = 0;
-        while (true) {
+        while (reading) {
             try {
                 bytes += input.read(buffer, bytes, buffer.length - bytes);
                 for (int i = begin; i < bytes; i++) {
                     if (buffer[i] == '\n') {
-                        handler.obtainMessage(1, begin, i, buffer).sendToTarget();
+                        handler.obtainMessage(WRISTBAND_DATA, begin, i, buffer).sendToTarget();
                         begin = i + 1;
                         if (i == bytes - 1) {
                             bytes = 0;
@@ -48,6 +49,7 @@ public class ConnectedThread extends Thread {
     }
 
     public void cancel() throws IOException {
+        reading = false;
         btSocket.close();
     }
 }

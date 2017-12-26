@@ -9,7 +9,7 @@ import android.widget.TextView;
 import static com.example.project.iot_bluetooth.Controller.REQUEST_ENABLE_BT;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
     private TextView tvStatus, tvMqttStatus, tvGesture;
     static Controller controller;
 
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == RESULT_OK) { // The user chose to enable Bluetooth in the dialog
-                setTextBluetooth("Connect to a device.");
+                setTextBluetooth("No device connected...");
             } else {
                 setTextBluetooth("Bluetooth disabled.");
             }
@@ -66,6 +66,4 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         controller.onDestroy();
     }
-
-
 }
