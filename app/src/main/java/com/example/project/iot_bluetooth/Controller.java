@@ -1,6 +1,5 @@
 package com.example.project.iot_bluetooth;
 
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -8,54 +7,53 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.IOException;
 import java.util.Set;
 
+import static com.example.project.iot_bluetooth.Constants.REQUEST_ENABLE_BT;
 
-public class Controller {
+
+public class Controller extends BroadcastReceiver {
     private MainActivity mainActivity;
     private BluetoothAdapter bluetoothAdapter;
     private ConnectThread connectThread;
     private MqttAndroidClient client;
     private PahoMqttClient pahoMqttClient;
     private Intent serviceIntent;
-    public static final int REQUEST_ENABLE_BT = 1;
 
-    public Controller(MainActivity mainActivity) {
+
+    public Controller(MainActivity mainActivity, boolean phoneRotation) {
         this.mainActivity = mainActivity;
-        initBluetooth();
+        initBtAdapter();
         if (bluetoothAdapter != null) {
             enableBluetooth();
             connectPairedDevices();
             initBroadcastReceiver();
         }
-        initMQTT();
-        /*Thread tt = new Thread(new TestClass(this));
-        tt.start();*/
+        initMQTT(phoneRotation);
     }
 
-    private void initBluetooth() {
+    /* control if the phone supports bluetooth */
+    private void initBtAdapter() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            setBluetoothStatus("No bluetooth support.");
+            setBluetoothStatus("No bluetooth support");
         }
     }
 
-    /* Shows a dialog that lets the user enable bluetooth if it's disabled */
+    /* Shows a dialog that lets the user enable bluetooth */
     private void enableBluetooth() {
         if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mainActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            mainActivity.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT);
         } else {
             setBluetoothStatus("No device is connected");
         }
     }
 
-    /* Creates a bluetooth connection with the bonded devices */
+    /* Creates a bluetooth connection with the paired devices */
     private void connectPairedDevices() {
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
@@ -65,94 +63,106 @@ public class Controller {
         }
     }
 
-    /* Initializes a broadcast listener to listen for bluetooth changes
-      *     - BLUETOOTH DISABLED
-      *     - BLUETOOTH ON
+    /* register a BroadcastReceiver to listen for bluetooth changes.
       *     - CONNECT
       *     - DISCONNECT
+      *     - BLUETOOTH ON
+      *     - BLUETOOTH DISABLED
       *     - DISCOVERY FINISHED
       * */
     private void initBroadcastReceiver() {
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
-        mainActivity.registerReceiver(broadcastReceiver, filter);
-        filter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        mainActivity.registerReceiver(broadcastReceiver, filter);
-        filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        mainActivity.registerReceiver(broadcastReceiver, filter);
-        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        mainActivity.registerReceiver(broadcastReceiver, filter);
+        mainActivity.registerReceiver(this, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
+        mainActivity.registerReceiver(this, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+        mainActivity.registerReceiver(this, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+        mainActivity.registerReceiver(this, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
     }
 
-    private void initMQTT() {
+    /* Connect to server and start service.
+     * on phone rotation don't start a new service because the old one is already running */
+    private void initMQTT(boolean phoneRotation) {
         pahoMqttClient = new PahoMqttClient();
         client = pahoMqttClient.getMqttClient(mainActivity.getApplicationContext(), Constants.MQTT_BROKER_URL, Constants.CLIENT_ID);
         serviceIntent = new Intent(mainActivity, MqttMessageService.class);
-        mainActivity.startService(serviceIntent);
+        if (!phoneRotation) {
+            mainActivity.startService(serviceIntent);
+        }
     }
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null) {
-                switch (action) {
-                    case BluetoothDevice.ACTION_ACL_CONNECTED:
-                        if (!isConnected() && !tryingToConnect()) { // no connection and no other running instance trying to establish a connection
-                            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                            connectToDevice(device);
-                            break;
-                        }
-                    case BluetoothDevice.ACTION_ACL_DISCONNECTED:
-                        onDisconnect();
-                        break;
-                    case BluetoothAdapter.ACTION_STATE_CHANGED:
-                        final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                        bluetoothStateChanged(state);
-                        break;
-                    case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                        if (!isConnected()) {
-                            connectPairedDevices();
-                        }
-                }
+    /* BroadcastReceiver */
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            switch (action) {
+                case BluetoothDevice.ACTION_ACL_CONNECTED:
+                    onBTConnection(intent);
+                    break;
+                case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                    onBTDisconnect();
+                    break;
+                case BluetoothAdapter.ACTION_STATE_CHANGED:
+                    bluetoothStateChanged(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR));
+                    break;
+                case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
+                    onDiscoveryFinished();
             }
         }
-    };
-
-    private boolean tryingToConnect() {
-        return connectThread != null && connectThread.isAlive();
     }
 
-    private boolean isConnected() {
-        return connectThread != null && connectThread.isConnected();
+    /* connect to device if not connected and no other thread is already trying to establish a connection */
+    private void onBTConnection(Intent intent) {
+        if (!isConnected() && !tryingToConnect()) {
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            connectToDevice(device);
+        }
+    }
+
+    private void onBTDisconnect() {
+        try {
+            if (connectThread != null) {
+                connectThread.cancel();
+            }
+            setBluetoothStatus("No device is connected");
+        } catch (IOException e) {
+            e.printStackTrace();
+            setBluetoothStatus("Error when disconnecting");
+        }
     }
 
     private void bluetoothStateChanged(int state) {
         switch (state) {
             case BluetoothAdapter.STATE_ON:
-                setBluetoothStatus("No device connected...");
+                setBluetoothStatus("No device is connected");
                 break;
             case BluetoothAdapter.STATE_OFF:
+                bluetoothAdapter.disable();
                 setBluetoothStatus("Bluetooth disabled");
                 break;
         }
     }
 
+    private void onDiscoveryFinished() {
+        if (!isConnected()) {
+            connectPairedDevices();
+        }
+    }
+
+    /*
+    * When discovery is finished (after enabling bluetooth), onResume() and ACTION_DISCOVERY_FINISHED will be called.
+    * They will both try to connect, to prevent it !tryingToConnect() is used.
+    * */
     private void connectToDevice(BluetoothDevice device) {
-        if (bluetoothAdapter != null) {
+        if (bluetoothAdapter != null && !tryingToConnect()) {
             connectThread = new ConnectThread(device, bluetoothAdapter, new MyHandler(this));
             connectThread.start();
         }
     }
 
-    private void onDisconnect() {
-        try {
-            if (connectThread != null) {
-                connectThread.cancel();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    /* Trying to reconnect after pressing the home button and coming back */
+    public void onResume() {
+        if (!isConnected()) {
+            connectPairedDevices();
         }
-        setBluetoothStatus("No device connected...");
     }
 
     /* Shutdown the connection */
@@ -166,31 +176,43 @@ public class Controller {
         }
     }
 
+    /*
+    * unregister BroadcastReceiver and
+    * if the activity is being destroyed for good (onBackPressed) then disconnect the client from the server and stop the service.
+    * */
     public void onDestroy() {
-        mainActivity.unregisterReceiver(broadcastReceiver);
-        try {
-            client.disconnect();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-        mainActivity.stopService(serviceIntent);
-    }
-
-    public void setBluetoothStatus(String status) {
-        mainActivity.setTextBluetooth(status);
-    }
-
-    public void setGesture(String gesture) {
-        mainActivity.setGesture(gesture);
-    }
-
-    public void addText(final String text) {
-        mainActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mainActivity.setText(text);
+        mainActivity.unregisterReceiver(this);
+        if (mainActivity.isFinishing()) {
+            try {
+                if (client != null && client.isConnected()) {
+                    client.disconnect();
+                }
+            } catch (MqttException e) {
+                e.printStackTrace();
             }
-        });
+            mainActivity.stopService(serviceIntent);
+        }
+    }
+
+    /* Called when a new server message is received*/
+    public void onMessageArrived(final String message) {
+        mainActivity.setMessage(message);
+    }
+
+    public void setBluetoothStatus(final String status) {
+        mainActivity.setBluetoothStatus(status);
+    }
+
+    public void setMqttStatus(final String status) {
+        mainActivity.setMqttStatus(status);
+    }
+
+    private boolean tryingToConnect() {
+        return connectThread != null && connectThread.isAlive();
+    }
+
+    private boolean isConnected() {
+        return connectThread != null && connectThread.isConnected();
     }
 
 
@@ -237,6 +259,8 @@ public class Controller {
             return false;
         }
     }
+
+
    /* ------------------------------------------------------------------------------------- */
 
 }

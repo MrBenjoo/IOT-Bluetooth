@@ -5,26 +5,31 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+/* used to read data from the wristband */
 public class ConnectedThread extends Thread {
     private BluetoothSocket btSocket;
     private InputStream input;
     private MyHandler handler;
-    private boolean reading = true;
+    private boolean reading;
 
     public ConnectedThread(BluetoothSocket btSocket, MyHandler handler) {
         this.btSocket = btSocket;
         this.handler = handler;
+        this.input = createInputStream();
+    }
+
+    private InputStream createInputStream() {
         InputStream tmpIn = null;
         try {
             tmpIn = btSocket.getInputStream();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-        input = tmpIn;
+        return tmpIn;
     }
 
     public void run() {
+        reading = true;
         byte[] buffer = new byte[1024];
         int begin = 0;
         int bytes = 0;

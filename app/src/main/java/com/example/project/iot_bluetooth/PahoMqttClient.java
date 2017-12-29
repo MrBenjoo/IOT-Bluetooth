@@ -16,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 
 
 public class PahoMqttClient {
-
     private static final String TAG = "PahoMqttClient";
     private MqttAndroidClient mqttAndroidClient;
 
@@ -32,8 +31,14 @@ public class PahoMqttClient {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    MainActivity.controller.addText("Failed to connect");
-                    Log.d(TAG, "Failure " + exception.toString());
+                    if(asyncActionToken.getClient().isConnected()) {
+                        MainActivity.controller.setMqttStatus("Connected to MQTT"); // client is already connected
+                    } else {
+                        MainActivity.controller.setMqttStatus("Failed to connect");
+                        Log.d(TAG, "Failure " + exception.toString());
+                    }
+
+
                 }
             });
         } catch (MqttException e) {
@@ -43,7 +48,7 @@ public class PahoMqttClient {
     }
 
     public void disconnect(@NonNull MqttAndroidClient client) throws MqttException {
-        IMqttToken mqttToken = client.disconnect();
+        final IMqttToken mqttToken = client.disconnect();
         mqttToken.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
@@ -82,7 +87,6 @@ public class PahoMqttClient {
         byte[] encodedPayload = new byte[0];
         encodedPayload = msg.getBytes("UTF-8");
         MqttMessage message = new MqttMessage(encodedPayload);
-        Log.v(TAG, "topic: " + topic + " message: " + msg);
         message.setId(320);
         message.setRetained(true);
         message.setQos(qos);

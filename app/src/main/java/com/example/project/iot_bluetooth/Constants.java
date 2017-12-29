@@ -16,4 +16,7 @@ public class Constants {
 
     public static final int CONNECTION_FAILED = 2;
 
+    /* ----------- Constant for onActivityResult() ----------- */
+    public static final int REQUEST_ENABLE_BT = 1;
+
 }
