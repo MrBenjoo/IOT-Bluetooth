@@ -28,7 +28,8 @@ public class MyHandler extends Handler {
                 int end = (int) msg.arg2;
                 String sensorValues = new String(writeBuf);
                 sensorValues = sensorValues.substring(begin, end);
-                Log.d("MyHandler", "message = " + sensorValues);
+                controller.LiveDataSet(sensorValues);
+                Log.i("MyHandler", "message = " + sensorValues);
                 break;
 
             case Constants.CONNECTION_FAILED:

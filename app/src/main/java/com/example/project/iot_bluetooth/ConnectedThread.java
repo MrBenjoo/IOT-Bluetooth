@@ -1,27 +1,59 @@
 package com.example.project.iot_bluetooth;
 
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /* used to read data from the wristband */
 public class ConnectedThread extends Thread {
     private BluetoothSocket btSocket;
     private InputStream input;
+    private OutputStream output;
     private MyHandler handler;
     private boolean reading;
+    private final String windowSize ="w30";
+    private final String frequency ="f30";
+    private final String sensitivity ="s24000";
 
     public ConnectedThread(BluetoothSocket btSocket, MyHandler handler) {
         this.btSocket = btSocket;
         this.handler = handler;
         this.input = createInputStream();
+        this.output = createOutputStream();
+        setUp();
+
+    }
+    private void setUp(){
+
+        try {
+            output.write(windowSize.getBytes());
+            output.flush();
+            output.write(frequency.getBytes());
+            output.flush();
+            output.write(sensitivity.getBytes());
+            output.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("BLUETOOTH","ERROR WITH SETUP ");
+        }
     }
 
     private InputStream createInputStream() {
         InputStream tmpIn = null;
         try {
             tmpIn = btSocket.getInputStream();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        return tmpIn;
+    }
+    private OutputStream createOutputStream() {
+        OutputStream tmpIn = null;
+        try {
+            tmpIn = btSocket.getOutputStream();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
