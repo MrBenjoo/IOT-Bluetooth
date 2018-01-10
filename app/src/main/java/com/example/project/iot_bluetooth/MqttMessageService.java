@@ -41,7 +41,7 @@ public class MqttMessageService extends Service implements MqttCallbackExtended 
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        MainActivity.controller.onMessageArrived(message.toString());
+        MainActivity.controller.onMessageArrived(topic, message.toString());
     }
 
     @Override
