@@ -1,5 +1,7 @@
 package com.example.project.iot_bluetooth;
 
+import android.util.Log;
+
 /**
  * Created by Sebastian Hoggard on 2017-12-30.
  */
@@ -47,6 +49,7 @@ public class Timer extends Thread {
         }
         if (mother != null) {
             mother.disconnect();
+            Log.v("Timer", "Timer disconnected communication");
         }
     }
 }

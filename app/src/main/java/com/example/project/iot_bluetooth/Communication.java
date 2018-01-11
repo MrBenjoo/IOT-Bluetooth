@@ -32,7 +32,6 @@ public class Communication {
 
     private PahoMqttClient listener = null;
     private MqttAndroidClient client = null;
-    //private ConnectedDevice device = null;
 
     /**
      * Base constructor.
@@ -89,7 +88,6 @@ public class Communication {
                         break;
                     case YURDAER:
                         deviceTopic = message;
-                        //device = new ConnectedDevice
                         break;
                 }
                 try {
@@ -122,7 +120,7 @@ public class Communication {
                 controller.setMqttStatus("Disconnected");
                 // timer will be disabled, and then reset :)
             }
-            //controller.setMqttStatus(message);        // too arbitrary
+            //controller.setMqttStatus(message);        // too much printing
             timer.reset();
         }
     }
@@ -149,7 +147,7 @@ public class Communication {
     }
 
     /**
-     * Sends any message to any topic, or the fConnected device. Good for troubleshooting.
+     * Sends any message to any topic, or the connected device. Good for troubleshooting.
      * @param topic     any topic, or null to use topic of fConnected device
      * @param message   any message
      */
@@ -159,6 +157,7 @@ public class Communication {
                 topic = deviceTopic;
             }
             else {
+                Log.v("Communicate", "Tried to send message, but has no topic...");
                 return;
             }
         }
@@ -186,7 +185,7 @@ public class Communication {
             fConnected = false;
             fPaired = false;
             timer.disable();
-            //controller.setMqttStatus("Disconnected");     // suddenly this method crashes
+            //controller.setMqttStatus("Disconnected");     // suddenly, this method crashes
         }
     }
 }

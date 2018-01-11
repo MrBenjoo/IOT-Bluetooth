@@ -79,7 +79,8 @@ public class Controller extends BroadcastReceiver {
             toast.show();
             counter=0;
             liveData= new  String[180];
-            publishMqttMessage(topicName,gesture);
+            //publishMqttMessage(topicName,gesture);
+            communicateGesture(gesture);
         }
 
     }
@@ -264,6 +265,29 @@ public class Controller extends BroadcastReceiver {
         return connectThread != null && connectThread.isConnected();
     }
 
+    private void communicateGesture(String gesture) {
+        switch (gesture) {
+            case "up":
+                communication.sendGesture(0);
+                break;
+            case "down":
+                communication.sendGesture(1);
+                break;
+            case "right":
+                communication.sendGesture(2);
+                break;
+            case "left":
+                communication.sendGesture(3);
+                break;
+            case "rotate_right":
+                communication.sendGesture(4);
+                break;
+            case "rotate_left":
+                communication.sendGesture(5);
+                break;
+        }
+    }
+
 
     /**
      * -------------------------------------------------------------------------------------
@@ -279,13 +303,6 @@ public class Controller extends BroadcastReceiver {
 //            return false;
 //        }
         communication = new Communication(this, Communication.Protocol.SEBASTIAN, pahoMqttClient, client);
-//        try {
-//            pahoMqttClient.publishMessage(client, "init_from_phone", 1, "INITIATE");
-//        } catch (MqttException e) {
-//            e.printStackTrace();
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         return true;
     }
     public boolean publishMqttMessage(String topic, String message){
