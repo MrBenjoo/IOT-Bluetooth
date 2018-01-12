@@ -33,6 +33,8 @@ public class Communication {
     private PahoMqttClient listener = null;
     private MqttAndroidClient client = null;
 
+    private String lastGesture = null;
+
     /**
      * Base constructor.
      * @param controller
@@ -91,6 +93,10 @@ public class Communication {
                         break;
                 }
                 try {
+                    if (!topic.split("#")[1].equals(lastGesture)) {
+                        return;
+                    }
+                    message = message.split("#")[0];
                     listener.publishMessage(client, myTopic, 1, message);
                     Log.v("Communication", "Handshake: " + message + ", " + myTopic);
                 } catch (UnsupportedEncodingException e) {
@@ -130,6 +136,7 @@ public class Communication {
      * @param nGesture  0-5, else it is ignored
      */
     public void sendGesture(int nGesture) {
+        lastGesture = gestures[nGesture];
         if (nGesture < 0 || nGesture > 5) {
             Log.v("Communication", "Incorrect gesture: " + nGesture);
             return;
