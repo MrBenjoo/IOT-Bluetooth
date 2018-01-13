@@ -314,22 +314,26 @@ public class Controller extends BroadcastReceiver {
         }
     }
     public boolean testPublishMessage_ThisIsATest() {
-        try {
-            pahoMqttClient.publishMessage(client, "This a test", 1, "test");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+//        try {
+//            pahoMqttClient.publishMessage(client, "This a test", 1, "test");
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+        communication.sendGesture(0);
+        return true;
     }
 
     public boolean testUnsubscribeFrom_topicTest() {
-        try {
-            pahoMqttClient.unSubscribe(client, "test");
-            return true;
-        } catch (MqttException e) {
-            e.printStackTrace();
-            return false;
-        }
+//        try {
+//            pahoMqttClient.unSubscribe(client, "test");
+//            return true;
+//        } catch (MqttException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+        communication.sendGesture(1);
+        return true;
     }
 
     public boolean testDisconnectFromServer() {

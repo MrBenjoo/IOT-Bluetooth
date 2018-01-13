@@ -52,7 +52,6 @@ public class Communication {
             switch (protocol) {
                 case SEBASTIAN:
                     this.myTopic = String.valueOf(random.nextLong());
-                    this.myTopic = "basicTopic";            //topicTest
                     break;
                 case YURDAER:
                     this.myTopic = myIdentity;
@@ -74,30 +73,31 @@ public class Communication {
     public void messageArrived(String topic, String message) {      // anropas från MqttCallbackExtended
         Log.v("Communication", "Message: " + topic + ", " + message);
         if (topic.equals(topicInitiate)) {
-            // perform handshake if not already fConnected
-            if (!fConnected) {
-                switch (protocol) {
-                    case SEBASTIAN:
-                        tempTopic = message;
-                        // generate new incoming topic and re-subscribe
-                        try {
-                            listener.unSubscribe(client, myTopic);
-                            myTopic = String.valueOf(random.nextLong());
-                            listener.subscribe(client, myTopic, 1);
-                        } catch (MqttException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case YURDAER:
-                        deviceTopic = message;
-                        break;
+            if (!fPaired) {
+                if (lastGesture == null) {
+                    controller.setMqttStatus("No gesture to send");
+                    Log.v("Communication", "No gesture to send");
                 }
+//            // perform handshake if not already fConnected
+//            if (!fConnected) {
+//                switch (protocol) {
+//                    case SEBASTIAN:
+//                        tempTopic = message;
+//                        // generate new incoming topic and re-subscribe
+//                        try {
+//                            listener.unSubscribe(client, myTopic);
+//                            myTopic = String.valueOf(random.nextLong());
+//                            listener.subscribe(client, myTopic, 1);
+//                        } catch (MqttException e) {
+//                            e.printStackTrace();
+//                        }
+//                        break;
+//                    case YURDAER:
+//                        deviceTopic = message;
+//                        break;
+//                }
                 try {
-                    if (!topic.split("#")[1].equals(lastGesture)) {
-                        return;
-                    }
-                    message = message.split("#")[0];
-                    listener.publishMessage(client, myTopic, 1, message);
+                    listener.publishMessage(client, lastGesture + "#" + myTopic, 1, message);
                     Log.v("Communication", "Handshake: " + message + ", " + myTopic);
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -105,9 +105,7 @@ public class Communication {
                     e.printStackTrace();
                 }
                 fConnected = true;
-                timer = new Timer(this);
-                timer.start();
-                controller.setMqttStatus("Initiating");
+                controller.setMqttStatus("Initiating " + deviceTopic);
             }
         }
         else if (topic.equals(myTopic)) {
@@ -119,6 +117,8 @@ public class Communication {
                         deviceTopic = message;
                 }
                 fPaired = true;
+                timer = new Timer(this);
+                timer.start();
                 controller.setMqttStatus("Paired");
             }
             if (message.equals(messageDisconnect)) {
@@ -164,7 +164,7 @@ public class Communication {
                 topic = deviceTopic;
             }
             else {
-                Log.v("Communicate", "Tried to send message, but has no topic...");
+                Log.v("Communication", "Tried to send message, but has no topic...");
                 return;
             }
         }
@@ -186,6 +186,8 @@ public class Communication {
             Log.v("Communication", "Disconnect");
             try {
                 listener.unSubscribe(client, deviceTopic);
+                myTopic = String.valueOf(random.nextLong());
+                listener.subscribe(client, myTopic, 1);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
