@@ -266,6 +266,9 @@ public class Controller extends BroadcastReceiver {
     }
 
     private void communicateGesture(String gesture) {
+        if (communication == null) {
+            communication = new Communication(this, Communication.Protocol.SEBASTIAN, pahoMqttClient, client);
+        }
         switch (gesture) {
             case "up":
                 communication.sendGesture(0);
